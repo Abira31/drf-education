@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 import os
-
+from datetime import timedelta
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -39,8 +39,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'djoser',
 
     'api',
+    'core',
 ]
 
 MIDDLEWARE = [
@@ -132,21 +134,32 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGGING = {
-    'version':1,
-    'handlers':{
-        'console': {'class':'logging.StreamHandler'}
-    },
-    'loggers':{
-        'django.db.backends':{
-            'handlers':['console'],
-            'level':'DEBUG'
-        }
-    }
-}
+# LOGGING = {
+#     'version':1,
+#     'handlers':{
+#         'console': {'class':'logging.StreamHandler'}
+#     },
+#     'loggers':{
+#         'django.db.backends':{
+#             'handlers':['console'],
+#             'level':'DEBUG'
+#         }
+#     }
+# }
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ]
+}
+
+# DJOSER = {
+#     'SERIALIZERS': {
+#         'user_create': 'core.serializers.UserCreateSerializer',
+#     }
+# }
+
+SIMPLE_JWT = {
+    'AUTH_HEADER_TYPES': ('JWT',),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1)
 }

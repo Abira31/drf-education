@@ -1,12 +1,13 @@
 from django.db import models
+from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator,MinValueValidator
 # Create your models here.
 class Subject(models.Model):
     subject = models.ForeignKey('Subjects',on_delete=models.CASCADE,blank=False,related_name='sub')
-    group = models.ManyToManyField('Groups',related_name='subject',blank=False)
+    group = models.ManyToManyField('Groups',related_name='subject',blank=True,null=True)
     teacher = models.ManyToManyField('Teachers',related_name='subject',blank=False)
-    def __str__(self):
-        return f'{self.subject.name} группа - ' + ", ".join([a.name for a in self.group.all()])
+    # def __str__(self):
+    #     return f'{self.subject.name} группа - ' + ", ".join([a.name for a in self.group.all()])
 
 class Groups(models.Model):
     name = models.CharField(max_length=120,blank=False)
@@ -14,22 +15,20 @@ class Groups(models.Model):
         return self.name
 
 class Teachers(models.Model):
-    first_name = models.CharField(max_length=80,blank=False)
-    last_name = models.CharField(max_length=80,blank=False)
-    def __str__(self):
-        return f'{self.first_name} {self.last_name}'
+    user = models.OneToOneField(User, on_delete=models.SET_NULL, blank=True, null=True)
+    # def __str__(self):
+    #     return f'{self.first_name} {self.last_name}'
 
 class Students(models.Model):
-    first_name = models.CharField(max_length=80, blank=False)
-    last_name = models.CharField(max_length=80, blank=False)
+    user = models.OneToOneField(User, on_delete=models.SET_NULL, blank=True, null=True)
     group = models.ForeignKey(Groups,on_delete=models.CASCADE,blank=False)
-    def __str__(self):
-        return f'{self.first_name}-{self.last_name} группа {self.group.name}'
+    # def __str__(self):
+    #     return f'{self.first_name}-{self.last_name} группа {self.group.name}'
 
 class Subjects(models.Model):
     name = models.CharField(max_length=120, blank=False)
-    def __str__(self):
-        return self.name
+    # def __str__(self):
+    #     return self.name
 
 class Marks(models.Model):
     student = models.ForeignKey(Students,on_delete=models.CASCADE,blank=False,related_name='marks')
@@ -39,8 +38,7 @@ class Marks(models.Model):
         MinValueValidator(1),
         MaxValueValidator(5)
     ])
-    def __str__(self):
-        return f'{self.student.last_name} предмет {self.subject.name} отценка: {self.mark} {self.date}'
-
+    # def __str__(self):
+    #     return f'{self.student.last_name} предмет {self.subject.name} отценка: {self.mark} {self.date}'
 
 
