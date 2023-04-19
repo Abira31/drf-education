@@ -1,7 +1,8 @@
 from rest_framework import serializers
 
 from .models import (Teachers,Subjects,
-                     Groups,Subject)
+                     Groups,Subject,
+                     Students)
 
 class TeachersSerializers(serializers.ModelSerializer):
     class Meta:
@@ -25,3 +26,17 @@ class SubjectSerializers(serializers.ModelSerializer):
     class Meta:
         model = Subject
         fields = ['subject','group','teacher']
+
+class StudentsSerializers(serializers.ModelSerializer):
+    url = serializers.HyperlinkedIdentityField(view_name="students-detail")
+    class Meta:
+        model = Students
+        fields = ['first_name','last_name','url']
+
+class StudentsDetailSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = Students
+        fields = '__all__'
+
+
+
