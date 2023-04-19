@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from .models import (Teachers,Subjects,
-                     Groups)
+                     Groups,Subject)
 
 class TeachersSerializers(serializers.ModelSerializer):
     class Meta:
@@ -17,3 +17,11 @@ class GroupsSerializers(serializers.ModelSerializer):
     class Meta:
         model = Groups
         fields = ['name','url']
+
+class SubjectSerializers(serializers.ModelSerializer):
+    subject = SubjectsSerializers()
+    group = GroupsSerializers(many=True)
+    teacher = TeachersSerializers(many=True)
+    class Meta:
+        model = Subject
+        fields = ['subject','group','teacher']
