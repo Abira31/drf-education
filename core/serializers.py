@@ -1,6 +1,7 @@
 from djoser.serializers import (UserCreateSerializer as BaseUserCreate )
 from django.contrib.auth.models import User
 from .models import Extension
+from api.models import Students,Teachers
 
 class StudentsCreateSerializer(BaseUserCreate):
     class Meta(BaseUserCreate.Meta):
@@ -8,7 +9,8 @@ class StudentsCreateSerializer(BaseUserCreate):
 
     def save(self, **kwargs):
         user = User.objects.create_user(**self.validated_data)
-        extension = Extension.objects.create(user=user,is_student=True)
+        Extension.objects.create(user=user,is_student=True)
+        Students.objects.create(user=user)
         return user
 
 
@@ -18,5 +20,6 @@ class TeachersCreateSerializer(BaseUserCreate):
 
     def save(self, **kwargs):
         user = User.objects.create_user(**self.validated_data)
-        extension = Extension.objects.create(user=user, is_teacher=True)
+        Extension.objects.create(user=user, is_teacher=True)
+        Teachers.objects.create(user=user)
         return user

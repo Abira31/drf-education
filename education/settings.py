@@ -80,13 +80,23 @@ WSGI_APPLICATION = 'education.wsgi.application'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'HOST': os.environ.get('DB_HOST'),
+#         'NAME': os.environ.get('DB_NAME'),
+#         'USER': os.environ.get('DB_USER'),
+#         'PASSWORD': os.environ.get('DB_PASS'),
+#     }
+# }
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'HOST': os.environ.get('DB_HOST'),
-        'NAME': os.environ.get('DB_NAME'),
-        'USER': os.environ.get('DB_USER'),
-        'PASSWORD': os.environ.get('DB_PASS'),
+        'HOST': '0.0.0.0',
+        'NAME': 'dbname',
+        'USER': 'dbuser',
+        'PASSWORD': 'pass',
     }
 }
 
@@ -134,18 +144,18 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# LOGGING = {
-#     'version':1,
-#     'handlers':{
-#         'console': {'class':'logging.StreamHandler'}
-#     },
-#     'loggers':{
-#         'django.db.backends':{
-#             'handlers':['console'],
-#             'level':'DEBUG'
-#         }
-#     }
-# }
+LOGGING = {
+    'version':1,
+    'handlers':{
+        'console': {'class':'logging.StreamHandler'}
+    },
+    'loggers':{
+        'django.db.backends':{
+            'handlers':['console'],
+            'level':'DEBUG'
+        }
+    }
+}
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
