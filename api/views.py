@@ -1,12 +1,10 @@
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.exceptions import ValidationError
-from rest_framework import generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 
 from django.db.models import Prefetch
-
 from .serializers import (TeachersSerializers,
                           SubjectsSerializers,
                           GroupsSerializers,
@@ -15,7 +13,7 @@ from .serializers import (TeachersSerializers,
                           GroupDistributionSerializers,
                           SubjectSerializers,
                           TeacherDetailSerializers,
-                          UserSerializers)
+                          SubjectSaveSerializers)
 
 from .models import (Teachers,Subjects,
                      Groups,Subject,
@@ -45,7 +43,7 @@ class SubjectsViewSet(ModelViewSet):
 class GroupsViewSet(ModelViewSet):
     serializer_class = GroupsSerializers
     queryset = Groups.objects.all()
-    permission_classes = [IsTeacherOrReadOnly]
+    permission_classes = [IsAdminUserOrReadOnly]
 
     def get_object_student(self,pk):
         try:
@@ -80,12 +78,37 @@ class GroupsViewSet(ModelViewSet):
 
 #
 class SubjectViewSet(ModelViewSet):
-    http_method_names = ['get']
     serializer_class = SubjectSerializers
     queryset = Subject.objects\
         .select_related('subject')\
         .prefetch_related('group')\
         .prefetch_related('teacher')
+    permission_classes = [IsAdminUserOrReadOnly]
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return SubjectSerializers
+        return SubjectSaveSerializers
+
+    def create(self, request, *args, **kwargs):
+        serializers = SubjectSaveSerializers(data=request.data)
+        serializers.is_valid(raise_exception=True)
+        serializers.save()
+        return Response(status=status.HTTP_201_CREATED)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializers = SubjectSaveSerializers(instance=instance,data=request.data)
+        serializers.is_valid(raise_exception=True)
+        serializers.save()
+        return Response(status=status.HTTP_200_OK)
+
+    def get_object(self):
+        try:
+            subject = Subject.objects.get(id=self.kwargs.get('pk'))
+            return subject
+        except Subject.DoesNotExist:
+            raise ValidationError({"message_error": f"Subject with this id = {self.kwargs.get('pk')}  does not exist"})
+
 
 class StudentsViewSet(ModelViewSet):
     def get_serializer_class(self):

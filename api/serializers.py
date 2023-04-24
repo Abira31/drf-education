@@ -43,8 +43,61 @@ class SubjectSerializers(serializers.ModelSerializer):
     teacher = TeachersSerializers(many=True)
     class Meta:
         model = Subject
-        fields = ['subject','group','teacher']
+        fields = ['url','subject','group','teacher']
 
+class SubjectSaveSerializers(serializers.Serializer):
+    subject = serializers.IntegerField()
+    group = serializers.ListField(
+        child=serializers.IntegerField()
+    )
+    teacher = serializers.ListField(
+        child=serializers.IntegerField()
+    )
+
+    def validate_subject(self, attrs):
+        try:
+            Subjects.objects.get(id=attrs)
+        except Subjects.DoesNotExist:
+            raise serializers.ValidationError({"message_error":f"Subject with this id = {attrs}  does not exist"})
+        return attrs
+    def validate_group(self, attrs):
+        err = []
+        if len(attrs) == 0:
+            raise serializers.ValidationError({"message_error": f"Groups with this ID {err} must not be empty"})
+        for attr in attrs:
+            try:
+                Groups.objects.get(id=attr)
+            except Groups.DoesNotExist:
+                err.append(attr)
+        if len(err) > 0:
+            raise serializers.ValidationError({"message_error": f"Groups with this id in {list(set(err))} does not exist"})
+        return attrs
+    def validate_teacher(self, attrs):
+        err = []
+        if len(attrs) == 0:
+            raise serializers.ValidationError({"message_error": f"Teachers with this ID {err} must not be empty"})
+        for attr in attrs:
+            try:
+                Teachers.objects.get(id=attr)
+            except Teachers.DoesNotExist:
+                err.append(attr)
+        if len(err) > 0:
+            raise serializers.ValidationError({"message_error": f"Teachers with this id in {list(set(err))} does not exist"})
+        return attrs
+    def create(self, validated_data):
+        subject = Subject.objects.create(
+            subject = Subjects.objects.get(id=validated_data.get('subject'))
+        )
+        subject.group.add(*[Groups.objects.get(id=i) for i in validated_data.get('group')])
+        subject.teacher.add(*[Teachers.objects.get(id=i) for i in validated_data.get('teacher')])
+        return subject
+    def update(self, instance, validated_data):
+        instance.subject = Subjects.objects.get(id=validated_data.get('subject'))
+        instance.group.clear()
+        instance.group.add(*[Groups.objects.get(id=i) for i in validated_data.get('group')])
+        instance.teacher.clear()
+        instance.teacher.add(*[Teachers.objects.get(id=i) for i in validated_data.get('teacher')])
+        return instance
 class TeacherSubjectSerializers(serializers.ModelSerializer):
     subject = SubjectsSerializers()
     group = GroupsSerializers(many=True)
