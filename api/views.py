@@ -12,16 +12,30 @@ from .serializers import (TeachersSerializers,
                           StudentsSerializers,
                           StudentsDetailSerializers,
                           GroupDistributionSerializers,
-                          SubjectSerializers)
+                          SubjectSerializers,
+                          TeacherDetailSerializers,
+                          UserSerializers)
 
 from .models import (Teachers,Subjects,
                      Groups,Subject,
-                     Students,Marks)
-from django.contrib.auth.models import User
+                     Students,Marks,
+                     User)
+
+from core.permissions import IsTeacherOrReadOnly
+
+
+
 class TeachersViewSet(ModelViewSet):
     http_method_names = ['get']
     serializer_class = TeachersSerializers
     queryset = Teachers.objects.all().select_related('teacher')
+    def get_serializer_class(self):
+        print(self.request.method)
+        pk = self.kwargs.get('pk',None)
+        if pk:
+            return TeacherDetailSerializers
+        return self.serializer_class
+
 
 class SubjectsViewSet(ModelViewSet):
     serializer_class = SubjectsSerializers
@@ -30,6 +44,7 @@ class SubjectsViewSet(ModelViewSet):
 class GroupsViewSet(ModelViewSet):
     serializer_class = GroupsSerializers
     queryset = Groups.objects.all()
+    permission_classes = [IsTeacherOrReadOnly]
 
     def get_object_student(self,pk):
         try:

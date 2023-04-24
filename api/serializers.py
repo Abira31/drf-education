@@ -12,11 +12,19 @@ class UserSerializers(serializers.ModelSerializer):
 
 
 
+
 class TeachersSerializers(serializers.ModelSerializer):
     teacher = UserSerializers()
     class Meta:
         model = Teachers
         fields = ['url','teacher']
+
+
+
+class TeachersUpdateSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['first_name','last_name','email']
 
 #
 class SubjectsSerializers(serializers.ModelSerializer):
@@ -36,6 +44,19 @@ class SubjectSerializers(serializers.ModelSerializer):
     class Meta:
         model = Subject
         fields = ['subject','group','teacher']
+
+class TeacherSubjectSerializers(serializers.ModelSerializer):
+    subject = SubjectsSerializers()
+    group = GroupsSerializers(many=True)
+    class Meta:
+        model = Subject
+        fields = ['subject', 'group']
+class TeacherDetailSerializers(serializers.ModelSerializer):
+    teacher = UserSerializers()
+    subject = TeacherSubjectSerializers(many=True)
+    class Meta:
+        model = Teachers
+        fields = ['teacher','subject']
 
 class StudentsSerializers(serializers.ModelSerializer):
     url = serializers.HyperlinkedIdentityField(view_name="students-detail")

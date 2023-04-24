@@ -1,3 +1,4 @@
+from django.urls import path
 from rest_framework_nested import routers
 from core.views import StudentCreateAPIView,TeacherCreateAPIView
 from .views import (TeachersViewSet,
@@ -16,7 +17,9 @@ router.register('groups',GroupsViewSet)
 router.register('subject',SubjectViewSet)
 router.register('students',StudentsViewSet,basename='students')
 
+
 groups_router = routers.NestedSimpleRouter(router,'groups',lookup='group')
 groups_router.register('students',StudentsViewSet,basename='group-students')
+
 
 urlpatterns = router.urls + groups_router.urls

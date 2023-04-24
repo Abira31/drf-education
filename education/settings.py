@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'djoser',
+    'drf_spectacular',
 
     'api',
     'core',
@@ -144,23 +145,28 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGGING = {
-    'version':1,
-    'handlers':{
-        'console': {'class':'logging.StreamHandler'}
-    },
-    'loggers':{
-        'django.db.backends':{
-            'handlers':['console'],
-            'level':'DEBUG'
-        }
-    }
-}
+# LOGGING = {
+#     'version':1,
+#     'handlers':{
+#         'console': {'class':'logging.StreamHandler'}
+#     },
+#     'loggers':{
+#         'django.db.backends':{
+#             'handlers':['console'],
+#             'level':'DEBUG'
+#         }
+#     }
+# }
 
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+
     'DEFAULT_PERMISSION_CLASSES': [
        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
-    ]
+    ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 # DJOSER = {
@@ -173,3 +179,20 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('JWT',),
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1)
 }
+
+# SPECTACULAR_SETTINGS = {
+#     'TITLE': 'Education API',
+#     'DESCRIPTION': 'This is a education official API documentation.',
+#     'VERSION': '1.0.0',
+#     'SERVE_INCLUDE_SCHEMA': False,
+#     "APPEND_COMPONENTS": {
+#         "securitySchemes": {
+#             "ApiKeyAuth": {
+#                 "type": "apiKey",
+#                 "in": "header",
+#                 "name": "Authorization"
+#             }
+#         }
+#     },
+#     "SECURITY": [{"ApiKeyAuth": [], }],
+# }
