@@ -4,6 +4,7 @@ from rest_framework import generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
+
 from django.db.models import Prefetch
 
 from .serializers import (TeachersSerializers,
@@ -21,7 +22,7 @@ from .models import (Teachers,Subjects,
                      Students,Marks,
                      User)
 
-from core.permissions import IsTeacherOrReadOnly
+from core.permissions import IsTeacherOrReadOnly,IsAdminUserOrReadOnly
 
 
 
@@ -30,7 +31,6 @@ class TeachersViewSet(ModelViewSet):
     serializer_class = TeachersSerializers
     queryset = Teachers.objects.all().select_related('teacher')
     def get_serializer_class(self):
-        print(self.request.method)
         pk = self.kwargs.get('pk',None)
         if pk:
             return TeacherDetailSerializers
@@ -40,6 +40,7 @@ class TeachersViewSet(ModelViewSet):
 class SubjectsViewSet(ModelViewSet):
     serializer_class = SubjectsSerializers
     queryset = Subjects.objects.all()
+    permission_classes = [IsAdminUserOrReadOnly]
 #
 class GroupsViewSet(ModelViewSet):
     serializer_class = GroupsSerializers

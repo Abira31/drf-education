@@ -7,3 +7,9 @@ class IsTeacherOrReadOnly(BasePermission):
         if hasattr(request.user,'extension'):
             return bool(request.user.extension.is_teacher)
         return False
+
+class IsAdminUserOrReadOnly(BasePermission):
+    def has_permission(self, request, view):
+        if request.method in SAFE_METHODS:
+            return True
+        return bool(request.user.is_staff)
