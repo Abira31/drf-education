@@ -19,12 +19,13 @@ from .serializers import (TeachersSerializers,
 
 from .models import (Teachers,Subjects,
                      Groups,Subject,
-                     Students,Marks,
-                     User)
+                     Students,Marks)
 
 from core.permissions import (IsTeacherOrReadOnly,
                               IsAdminUserOrReadOnly,
                               IsStudentOrReadOnly)
+
+from core.pagination import (SubjectPagination,StudentPagination)
 
 class TeachersViewSet(ModelViewSet):
     http_method_names = ['get']
@@ -86,6 +87,8 @@ class SubjectViewSet(ModelViewSet):
         .prefetch_related('group')\
         .prefetch_related('teacher')
     permission_classes = [IsAdminUserOrReadOnly]
+    pagination_class = SubjectPagination
+
     def get_serializer_class(self):
         if self.action in ['list','create']:
             return SubjectSerializers
@@ -115,6 +118,7 @@ class SubjectViewSet(ModelViewSet):
 class StudentsViewSet(ModelViewSet):
     http_method_names = ['get']
     serializer_class = StudentsSerializers
+    pagination_class = StudentPagination
     def get_queryset(self):
         if self.kwargs.get('group_pk',None):
             return Students.objects.filter(group=self.kwargs['group_pk'])\
@@ -132,7 +136,10 @@ class MarksViewSet(ModelViewSet):
         if hasattr(self.request.user, 'extension'):
             if self.request.user.extension.is_teacher:
                 return [IsTeacherOrReadOnly()]
-            return [IsStudentOrReadOnly()]
+            student = Students.objects.get(student=self.request.user)
+            if student.id == int(self.kwargs.get('student_pk')):
+                return [IsStudentOrReadOnly()]
+            return [IsTeacherOrReadOnly()]
         return [IsTeacherOrReadOnly()]
     def get_queryset(self):
         if self.request.user.extension.is_teacher:

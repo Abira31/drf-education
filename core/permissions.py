@@ -20,3 +20,4 @@ class IsStudentOrReadOnly(BasePermission):
             return False
         return False
 
+
