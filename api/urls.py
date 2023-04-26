@@ -5,7 +5,8 @@ from .views import (TeachersViewSet,
                     SubjectsViewSet,
                     GroupsViewSet,
                     StudentsViewSet,
-                    SubjectViewSet)
+                    SubjectViewSet,
+                    MarksViewSet)
 
 router = routers.DefaultRouter()
 router.register('create/student',StudentCreateAPIView,basename='create_student')
@@ -21,5 +22,8 @@ router.register('students',StudentsViewSet,basename='students')
 groups_router = routers.NestedSimpleRouter(router,'groups',lookup='group')
 groups_router.register('students',StudentsViewSet,basename='group-students')
 
+student_mark_router = routers.NestedSimpleRouter(router,'students',lookup='student')
+student_mark_router.register('marks',MarksViewSet,basename='student-mark')
 
-urlpatterns = router.urls + groups_router.urls
+
+urlpatterns = router.urls + groups_router.urls + student_mark_router.urls

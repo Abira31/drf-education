@@ -13,7 +13,9 @@ from .serializers import (TeachersSerializers,
                           GroupDistributionSerializers,
                           SubjectSerializers,
                           TeacherDetailSerializers,
-                          SubjectSaveSerializers)
+                          SubjectSaveSerializers,
+                          MarksSaveSerializers,
+                          MarksSerializers)
 
 from .models import (Teachers,Subjects,
                      Groups,Subject,
@@ -21,8 +23,6 @@ from .models import (Teachers,Subjects,
                      User)
 
 from core.permissions import IsTeacherOrReadOnly,IsAdminUserOrReadOnly
-
-
 
 class TeachersViewSet(ModelViewSet):
     http_method_names = ['get']
@@ -85,9 +85,10 @@ class SubjectViewSet(ModelViewSet):
         .prefetch_related('teacher')
     permission_classes = [IsAdminUserOrReadOnly]
     def get_serializer_class(self):
-        if self.request.method == 'GET':
+        if self.action in ['list','create']:
             return SubjectSerializers
-        return SubjectSaveSerializers
+        elif self.action in ['retrieve','update','partial_update']:
+            return SubjectSaveSerializers
 
     def create(self, request, *args, **kwargs):
         serializers = SubjectSaveSerializers(data=request.data)
@@ -109,19 +110,14 @@ class SubjectViewSet(ModelViewSet):
         except Subject.DoesNotExist:
             raise ValidationError({"message_error": f"Subject with this id = {self.kwargs.get('pk')}  does not exist"})
 
-
 class StudentsViewSet(ModelViewSet):
-    def get_serializer_class(self):
-        pk = self.kwargs.get('pk',None)
-        if pk is not None:
-            return StudentsDetailSerializers
-        return StudentsSerializers
+    http_method_names = ['get']
+    serializer_class = StudentsSerializers
     def get_queryset(self):
         if self.kwargs.get('group_pk',None):
             return Students.objects.filter(group=self.kwargs['group_pk'])\
                 .select_related('student')\
                 .select_related('group')
-
         return Students.objects.all()\
             .select_related('student')\
             .prefetch_related('group',
@@ -129,6 +125,34 @@ class StudentsViewSet(ModelViewSet):
                                      .select_related('subject')
                                      )
                             )
-    def get_serializer_context(self):
-        return {'group_pk': self.kwargs.get('group_pk',None),
-                'request': self.request}
+class MarksViewSet(ModelViewSet):
+    permission_classes = [IsTeacherOrReadOnly]
+    def get_queryset(self):
+        teacher = Teachers.objects.get(teacher=self.request.user.id)
+        subject = [subject.subject for subject in Subject.objects.filter(teacher=teacher)]
+        return Marks.objects.filter(student=self.kwargs.get('student_pk'),
+                                   subject__in=subject) \
+            .select_related('subject')
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return MarksSerializers
+        return MarksSaveSerializers
+
+    def create(self, request, *args, **kwargs):
+        serializers = MarksSaveSerializers(data=request.data,context={'student_pk': self.kwargs['student_pk'],
+                                                                      'request':request})
+        serializers.is_valid(raise_exception=True)
+        serializers.save()
+        return Response(status=status.HTTP_200_OK)
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializers = MarksSaveSerializers(instance=instance, data=request.data,context={'student_pk': self.kwargs['student_pk'],
+                                                                                         'request':request})
+        serializers.is_valid(raise_exception=True)
+        serializers.save()
+        return Response(status=status.HTTP_200_OK)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.delete()
+        return Response(status=status.HTTP_200_OK)

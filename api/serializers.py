@@ -123,10 +123,41 @@ class StudentsSerializers(serializers.ModelSerializer):
         fields = ['url','student','group']
 #
 class MarksSerializers(serializers.ModelSerializer):
-    subject = serializers.CharField(source='subject.name')
+    subject = serializers.CharField(source='subject.name',read_only=True)
+    mark = serializers.IntegerField(read_only=True)
     class Meta:
         model = Marks
-        fields = ['subject','date','mark']
+        fields = ['id','subject','mark']
+
+class MarksSaveSerializers(serializers.ModelSerializer):
+    subject = serializers.IntegerField(source='subject.id')
+    class Meta:
+        model = Marks
+        fields = ['subject', 'mark']
+
+    def validate_subject(self, attrs):
+        teacher = Teachers.objects.get(teacher=self.context.get('request').user)
+        subject = [subject.subject for subject in Subject.objects.filter(teacher=teacher)]
+        try:
+            sub = Subjects.objects.get(id=attrs)
+            if sub in subject:
+                return attrs
+            raise serializers.ValidationError({"message_error": f"No rights to change marks"})
+        except Subjects.DoesNotExist:
+            raise serializers.ValidationError({"message_error": f"Subject with this id in {attrs} does not exist"})
+        return attrs
+
+    def create(self, validated_data):
+        student = Students.objects.get(id=self.context['student_pk'])
+        subject = Subjects.objects.get(id=self.validated_data.get('subject')['id'])
+        mark = self.validated_data.get('mark')
+        mark = Marks.objects.create(student=student,subject=subject,mark=mark)
+        return mark
+    def update(self, instance, validated_data):
+        instance.subject = Subjects.objects.get(id=self.validated_data.get('subject')['id'])
+        instance.mark = self.validated_data.get('mark')
+        instance.save()
+        return instance
 
 class StudentsDetailSerializers(serializers.ModelSerializer):
     student = UserSerializers()
@@ -157,3 +188,4 @@ class GroupDistributionSerializers(serializers.Serializer):
         student.group = group
         student.save()
         return student
+
