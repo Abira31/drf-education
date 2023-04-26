@@ -129,9 +129,11 @@ class StudentsViewSet(ModelViewSet):
                             )
 class MarksViewSet(ModelViewSet):
     def get_permissions(self):
-        if self.request.user.extension.is_teacher:
-            return [IsTeacherOrReadOnly()]
-        return [IsStudentOrReadOnly()]
+        if hasattr(self.request.user, 'extension'):
+            if self.request.user.extension.is_teacher:
+                return [IsTeacherOrReadOnly()]
+            return [IsStudentOrReadOnly()]
+        return [IsTeacherOrReadOnly()]
     def get_queryset(self):
         if self.request.user.extension.is_teacher:
             teacher = Teachers.objects.get(teacher=self.request.user.id)
@@ -139,7 +141,9 @@ class MarksViewSet(ModelViewSet):
             return Marks.objects.filter(student=self.kwargs.get('student_pk'),
                                        subject__in=subject) \
                 .select_related('subject')
-        return Marks.objects.filter(student=self.kwargs.get('student_pk')).select_related('subject')
+        if self.request.user.extension.is_student:
+            return Marks.objects.filter(student=self.kwargs.get('student_pk')).select_related('subject')
+
     def get_serializer_class(self):
         if self.request.method == 'GET':
             return MarksSerializers
