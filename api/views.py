@@ -22,7 +22,9 @@ from .models import (Teachers,Subjects,
                      Students,Marks,
                      User)
 
-from core.permissions import IsTeacherOrReadOnly,IsAdminUserOrReadOnly
+from core.permissions import (IsTeacherOrReadOnly,
+                              IsAdminUserOrReadOnly,
+                              IsStudentOrReadOnly)
 
 class TeachersViewSet(ModelViewSet):
     http_method_names = ['get']
@@ -126,13 +128,18 @@ class StudentsViewSet(ModelViewSet):
                                      )
                             )
 class MarksViewSet(ModelViewSet):
-    permission_classes = [IsTeacherOrReadOnly]
+    def get_permissions(self):
+        if self.request.user.extension.is_teacher:
+            return [IsTeacherOrReadOnly()]
+        return [IsStudentOrReadOnly()]
     def get_queryset(self):
-        teacher = Teachers.objects.get(teacher=self.request.user.id)
-        subject = [subject.subject for subject in Subject.objects.filter(teacher=teacher)]
-        return Marks.objects.filter(student=self.kwargs.get('student_pk'),
-                                   subject__in=subject) \
-            .select_related('subject')
+        if self.request.user.extension.is_teacher:
+            teacher = Teachers.objects.get(teacher=self.request.user.id)
+            subject = [subject.subject for subject in Subject.objects.filter(teacher=teacher)]
+            return Marks.objects.filter(student=self.kwargs.get('student_pk'),
+                                       subject__in=subject) \
+                .select_related('subject')
+        return Marks.objects.filter(student=self.kwargs.get('student_pk')).select_related('subject')
     def get_serializer_class(self):
         if self.request.method == 'GET':
             return MarksSerializers
