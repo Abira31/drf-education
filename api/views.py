@@ -3,7 +3,8 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
-
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter,OrderingFilter
 from django.db.models import Prefetch
 from .serializers import (TeachersSerializers,
                           SubjectsSerializers,
@@ -26,6 +27,7 @@ from core.permissions import (IsTeacherOrReadOnly,
                               IsStudentOrReadOnly)
 
 from core.pagination import (SubjectPagination,StudentPagination)
+from core.filters import ProductFilter
 
 class TeachersViewSet(ModelViewSet):
     http_method_names = ['get']
@@ -119,6 +121,8 @@ class StudentsViewSet(ModelViewSet):
     http_method_names = ['get']
     serializer_class = StudentsSerializers
     pagination_class = StudentPagination
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    filterset_class = ProductFilter
     def get_queryset(self):
         if self.kwargs.get('group_pk',None):
             return Students.objects.filter(group=self.kwargs['group_pk'])\
