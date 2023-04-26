@@ -27,7 +27,7 @@ from core.permissions import (IsTeacherOrReadOnly,
                               IsStudentOrReadOnly)
 
 from core.pagination import (SubjectPagination,StudentPagination)
-from core.filters import ProductFilter
+from core.filters import (StudentsFilter,MarksFilter)
 
 class TeachersViewSet(ModelViewSet):
     http_method_names = ['get']
@@ -122,7 +122,7 @@ class StudentsViewSet(ModelViewSet):
     serializer_class = StudentsSerializers
     pagination_class = StudentPagination
     filter_backends = [DjangoFilterBackend, SearchFilter]
-    filterset_class = ProductFilter
+    filterset_class = StudentsFilter
     def get_queryset(self):
         if self.kwargs.get('group_pk',None):
             return Students.objects.filter(group=self.kwargs['group_pk'])\
@@ -136,6 +136,8 @@ class StudentsViewSet(ModelViewSet):
                                      )
                             )
 class MarksViewSet(ModelViewSet):
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    filterset_class = MarksFilter
     def get_permissions(self):
         if hasattr(self.request.user, 'extension'):
             if self.request.user.extension.is_teacher:
