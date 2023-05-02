@@ -82,25 +82,25 @@ WSGI_APPLICATION = 'education.wsgi.application'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'HOST': os.environ.get('DB_HOST'),
-#         'NAME': os.environ.get('DB_NAME'),
-#         'USER': os.environ.get('DB_USER'),
-#         'PASSWORD': os.environ.get('DB_PASS'),
-#     }
-# }
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'HOST': '0.0.0.0',
-        'NAME': 'dbname',
-        'USER': 'dbuser',
-        'PASSWORD': 'pass',
+        'HOST': os.environ.get('DB_HOST'),
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PASS'),
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'HOST': '0.0.0.0',
+#         'NAME': 'dbname',
+#         'USER': 'dbuser',
+#         'PASSWORD': 'pass',
+#     }
+# }
 
 
 # Password validation
@@ -170,30 +170,15 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
-# DJOSER = {
-#     'SERIALIZERS': {
-#         'user_create': 'core.serializers.UserCreateSerializer',
-#     }
-# }
 
 SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('JWT',),
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1)
 }
 
-# SPECTACULAR_SETTINGS = {
-#     'TITLE': 'Education API',
-#     'DESCRIPTION': 'This is a education official API documentation.',
-#     'VERSION': '1.0.0',
-#     'SERVE_INCLUDE_SCHEMA': False,
-#     "APPEND_COMPONENTS": {
-#         "securitySchemes": {
-#             "ApiKeyAuth": {
-#                 "type": "apiKey",
-#                 "in": "header",
-#                 "name": "Authorization"
-#             }
-#         }
-#     },
-#     "SECURITY": [{"ApiKeyAuth": [], }],
-# }
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Education API',
+    'DESCRIPTION': 'This is a education official API documentation.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+}
