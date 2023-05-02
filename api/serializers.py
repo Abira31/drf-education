@@ -137,15 +137,14 @@ class MarksSaveSerializers(serializers.ModelSerializer):
 
     def validate_subject(self, attrs):
         teacher = Teachers.objects.get(teacher=self.context.get('request').user)
-        subject = [subject.subject for subject in Subject.objects.filter(teacher=teacher)]
-        try:
-            sub = Subjects.objects.get(id=attrs)
-            if sub in subject:
-                return attrs
-            raise serializers.ValidationError({"message_error": f"No rights to change marks"})
-        except Subjects.DoesNotExist:
-            raise serializers.ValidationError({"message_error": f"Subject with this id in {attrs} does not exist"})
-        return attrs
+        subjects = Subject.objects.filter(teacher=teacher)
+        subject_list = []
+        if subjects.count() > 0:
+            subject_list = [sub.subject.name for sub in subjects]
+        subject = Subjects.objects.get(id=attrs)
+        if subject.name in subject_list:
+            return attrs
+        raise serializers.ValidationError({"message_error": f"No rights to change marks"})
 
     def create(self, validated_data):
         student = Students.objects.get(id=self.context['student_pk'])

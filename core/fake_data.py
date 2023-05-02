@@ -1,9 +1,3 @@
-from django.contrib.auth.models import User
-from api.models import (Subject,Groups,
-                        Teachers,Students,
-                        Subjects,Marks)
-from core.models import Extension
-import random
 teachers = [
     {'username': 'Антонин', 'password': 'T^5J+yHq2P', 'first_name': 'Антонин', 'last_name': 'Уваров',
      'email': 'fpoljakov@hotmail.com'},
@@ -72,68 +66,3 @@ subjects = [
     {"name": "Русский язык"},
     {"name": "Математика"},
 ]
-
-
-class Create:
-    teachers = []
-    students = []
-    groups = []
-    subjects = []
-    teachers_group = []
-    students_group = []
-    @classmethod
-    def _create_teacher(cls):
-        for teacher in teachers:
-            user = User.objects.create_user(**teacher)
-            Extension.objects.create(user=user, is_teacher=True)
-            cls.teachers_group.append(Teachers.objects.create(teacher=user))
-            cls.teachers.append(user)
-
-    @classmethod
-    def _create_student(cls):
-        for student in students:
-            user = User.objects.create_user(**student)
-            Extension.objects.create(user=user, is_student=True)
-            cls.students.append(user)
-
-    @classmethod
-    def _create_group(cls):
-        for group in groups:
-            cls.groups.append(Groups.objects.create(**group))
-
-    @classmethod
-    def _create_subjects(cls):
-        for subject in subjects:
-            cls.subjects.append(Subjects.objects.create(**subject))
-
-    @classmethod
-    def _create_students(cls):
-        for student in cls.students:
-            cls.students_group.append(Students.objects.create(student=student,group=random.choice(cls.groups)))
-    @classmethod
-    def _create_subject(cls):
-        for _ in range(0,5):
-            subject = random.choice(cls.subjects)
-            groups = random.choices(cls.groups,k=random.randint(1,len(cls.groups)))
-            teachers = random.choices(cls.teachers_group,k=random.randint(1,3))
-            sub = Subject.objects.create(subject=subject)
-            sub.group.add(*[group.id for group in groups])
-            sub.teacher.add(*[teacher.id for teacher in teachers])
-    @classmethod
-    def _create_marks(cls):
-        for _ in range(0,100):
-            student = random.choice(cls.students_group)
-            subject = random.choice(cls.subjects)
-            Marks.objects.create(student=student,subject=subject,mark=random.randint(2,5))
-
-
-
-    @classmethod
-    def create(cls):
-        cls._create_teacher()
-        cls._create_student()
-        cls._create_group()
-        cls._create_subjects()
-        cls._create_students()
-        cls._create_subject()
-        cls._create_marks()

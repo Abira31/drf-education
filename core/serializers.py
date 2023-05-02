@@ -10,7 +10,7 @@ class StudentsCreateSerializer(BaseUserCreate):
     def save(self, **kwargs):
         user = User.objects.create_user(**self.validated_data)
         Extension.objects.create(user=user,is_student=True)
-        Students.objects.create(user=user)
+        Students.objects.create(student=user)
         return user
 
 
@@ -21,5 +21,5 @@ class TeachersCreateSerializer(BaseUserCreate):
     def save(self, **kwargs):
         user = User.objects.create_user(**self.validated_data)
         Extension.objects.create(user=user, is_teacher=True)
-        Teachers.objects.create(user=user)
+        Teachers.objects.create(teacher=user)
         return user

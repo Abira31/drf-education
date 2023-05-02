@@ -44,7 +44,8 @@ class SubjectsViewSet(ModelViewSet):
     serializer_class = SubjectsSerializers
     queryset = Subjects.objects.all()
     permission_classes = [IsAdminUserOrReadOnly]
-#
+
+
 class GroupsViewSet(ModelViewSet):
     serializer_class = GroupsSerializers
     queryset = Groups.objects.all()

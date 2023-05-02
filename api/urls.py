@@ -9,12 +9,14 @@ from .views import (TeachersViewSet,
                     MarksViewSet)
 
 router = routers.DefaultRouter()
-router.register('create/student',StudentCreateAPIView,basename='create_student')
-router.register('create/teacher',TeacherCreateAPIView,basename='create_teacher')
+router.register('create_student',StudentCreateAPIView,basename='create_student')
+router.register('create_teacher',TeacherCreateAPIView,basename='create_teacher')
+
 
 router.register('teachers',TeachersViewSet)
 router.register('subjects',SubjectsViewSet)
 router.register('groups',GroupsViewSet)
+
 router.register('subject',SubjectViewSet)
 router.register('students',StudentsViewSet,basename='students')
 
@@ -26,3 +28,4 @@ student_mark_router = routers.NestedSimpleRouter(router,'students',lookup='stude
 student_mark_router.register('marks',MarksViewSet,basename='student-mark')
 
 urlpatterns = router.urls + groups_router.urls + student_mark_router.urls
+
